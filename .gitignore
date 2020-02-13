@@ -3,3 +3,5 @@
 ################################################################################
 
 /.vs/csharp-webhook-with-resource-data/v16/Server/sqlite3
+/TeamsGraphChangeNotification/bin/Debug/netcoreapp2.2
+/TeamsGraphChangeNotification/obj
