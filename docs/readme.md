@@ -21,31 +21,20 @@ To do the above tasks, the app will:
 
 - **Step 2**: Create AAD Application
     - Click on the navigation icon in the Azure Portal, click on "All services"; on the next screen search for "Azure Active Directory" and then click on "Azure Active Directory"
-<br/>
-<br/>
-    ![AadAppCreate1](ad1.png)
-<br/>
-<br/>
-    ![AadAppCreate2](ad2.png)
-<br/>
-<br/>
+
+![AadAppCreate1](ad1.png)
+
+![AadAppCreate2](ad2.png)
 
     - Click on "App registrations",  then click on "+ New registration"; Fill in the required details as shown below and click "Register"
-<br/>
-<br/>
-    ![AadAppCreate3](ad3.png)
-<br/>
-<br/>
-    ![AadAppCreate4](ad4.png)
-<br/>
-<br/>
+
+![AadAppCreate3](ad3.png)
+
+![AadAppCreate4](ad4.png)
 
     - Go to the Application, click "Certificates & secrets", then click "+ New client secret", Add a description and then click "Add" and save the secret somewhere, you will need to add this to the configuration.
-<br/>
-<br/>
-    ![AadAppCreate5](ad5.png)
-<br/>
-<br/>
+
+![AadAppCreate5](ad5.png)
 
 ### Setting up Azure Key Vault
 
@@ -53,69 +42,47 @@ To do the above tasks, the app will:
 
 - **Step 2**: Create a Resource Group
     - Click on the navigation icon in the Azure Portal, click on "Resource groups"; on the next screen click "+ Add"
-<br/>
-<br/>
-    ![ResourceGroupCreate1](RG1.png)
-<br/>
-<br/>
-    ![ResourceGroupCreate2](RG2.png)
-<br/>
-<br/>
+
+![ResourceGroupCreate1](RG1.png)
+
+![ResourceGroupCreate2](RG2.png)
 
     - Fill in the details as shown below and click "Review + create"; on the next screen click "Create"
-<br/>
-<br/>
-    ![ResourceGroupCreate3](RG3.png)
-<br/>
-<br/>
-    ![ResourceGroupCreate4](RG4.png)
-<br/>
-<br/>
+
+![ResourceGroupCreate3](RG3.png)
+
+![ResourceGroupCreate4](RG4.png)
 
 - **Step 3**: Create Azure Key Vault
     - Go to the resource group created in the step above, and click "+ Add", on the next screen search for "Key Vault" and hit the return key and then click "Create"
-<br/>
-<br/>
-    ![KeyVaultCreate1](kv1.png)
-<br/>
-<br/>
-    ![KeyVaultCreate2](kv2.png)
-<br/>
-<br/>
-    ![KeyVaultCreate3](kv3.png)
-<br/>
-<br/>
+
+![KeyVaultCreate1](kv1.png)
+
+![KeyVaultCreate2](kv2.png)
+
+![KeyVaultCreate3](kv3.png)
+
 
     - Fill in the required details as shown below and click "Access plolicy", then click "+ Add Access Policy"
-<br/>
-<br/>
-    ![KeyVaultCreate4](kv4.png)
-<br/>
-<br/>
-    ![KeyVaultCreate5](kv5.png)
-<br/>
-<br/>
+![KeyVaultCreate4](kv4.png)
+
+![KeyVaultCreate5](kv5.png)
+
 
     - Fill in the required details and click "Select", then click "Add" and then click "Create"
-<br/>
-<br/>
-    ![KeyVaultCreate6](kv6.png)
-<br/>
-<br/>
-    ![KeyVaultCreate7](kv7.png)
-<br/>
-<br/>
+
+![KeyVaultCreate6](kv6.png)
+
+![KeyVaultCreate7](kv7.png)
+
 
 - **Step 4**: Create Self-Signed certificate
     - Go to the Key Vault and click "Certificates", then click "+ Generate/Import"; Fill in the details as shown below and click "Create"
-<br/>
-<br/>
-    ![KeyVaultCreate8](kv8.png)
-<br/>
-<br/>
-    ![KeyVaultCreate9](kv9.png)
-<br/>
-<br/>
+
+![KeyVaultCreate8](kv8.png)
+
+![KeyVaultCreate9](kv9.png)
+
 
 ## Setting up and running the application
 
@@ -129,15 +96,13 @@ To do the above tasks, the app will:
         - **ClientSecret**: Client Secret of the AAD Application used to create the Change Notification subscription
         - **TenantIdOrName**: Tenant Id or Tenant Name for which the Change Notification subscription needs to be created (e.g. contoso.onmicrosoft.com)
         - **NotificationUrl**: The HTTPS Notification URL
-<br/>
-<br/>
-    - **Mandatory settings under KeyVaultSettings section**:
+
+  - **Mandatory settings under KeyVaultSettings section**:
         - **ClientId**: Client Id of the application created in the section "Create AAD Application for Key Vault Access" above
         - **ClientSecret**: Client Secret of the application created in the section "Create AAD Application for Key Vault Access" above
         - **CertificateUrl**: CertificateUrl of the certificate secret created in the section "Create AAD Application for Key Vault Access" above (e.g. https://changenotificationsample.vault.azure.net/secrets/ChangeNotificationSampleCertificate)
-<br/>
-<br/>
-    - **Optional settings under SubscriptionSettings section**:
+
+  - **Optional settings under SubscriptionSettings section**:
         - **ChangeType**: CSV; possible values created, updated, deleted
         - **Scope**: Production or Canary
         - **Resource**: resource to create subscription for (e.g. teams/allMessages)
