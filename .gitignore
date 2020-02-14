@@ -5,3 +5,5 @@
 /.vs/csharp-webhook-with-resource-data/v16/Server/sqlite3
 /TeamsGraphChangeNotification/bin/Debug/netcoreapp2.2
 /TeamsGraphChangeNotification/obj
+/.vs/csharp-webhook-with-resource-data/DesignTimeBuild
+/.vs/csharp-webhook-with-resource-data/v16/.suo
