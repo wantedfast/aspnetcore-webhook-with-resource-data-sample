@@ -26,13 +26,13 @@ To do the above tasks, the app will:
 
 ![AadAppCreate2](ad2.png)
 
-    - Click on "App registrations",  then click on "+ New registration"; Fill in the required details as shown below and click "Register"
+- Click on "App registrations",  then click on "+ New registration"; Fill in the required details as shown below and click "Register"
 
 ![AadAppCreate3](ad3.png)
 
 ![AadAppCreate4](ad4.png)
 
-    - Go to the Application, click "Certificates & secrets", then click "+ New client secret", Add a description and then click "Add" and save the secret somewhere, you will need to add this to the configuration.
+- Go to the Application, click "Certificates & secrets", then click "+ New client secret", Add a description and then click "Add" and save the secret somewhere, you will need to add this to the configuration.
 
 ![AadAppCreate5](ad5.png)
 
@@ -47,7 +47,7 @@ To do the above tasks, the app will:
 
 ![ResourceGroupCreate2](rg2.png)
 
-    - Fill in the details as shown below and click "Review + create"; on the next screen click "Create"
+- Fill in the details as shown below and click "Review + create"; on the next screen click "Create"
 
 ![ResourceGroupCreate3](rg3.png)
 
@@ -63,13 +63,13 @@ To do the above tasks, the app will:
 ![KeyVaultCreate3](kv3.png)
 
 
-    - Fill in the required details as shown below and click "Access plolicy", then click "+ Add Access Policy"
+- Fill in the required details as shown below and click "Access plolicy", then click "+ Add Access Policy"
 ![KeyVaultCreate4](kv4.png)
 
 ![KeyVaultCreate5](kv5.png)
 
 
-    - Fill in the required details and click "Select", then click "Add" and then click "Create"
+- Fill in the required details and click "Select", then click "Add" and then click "Create"
 
 ![KeyVaultCreate6](kv6.png)
 
