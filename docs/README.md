@@ -23,27 +23,27 @@ To do the above tasks, the app will:
     - Click on the navigation icon in the Azure Portal, click on "All services"; on the next screen search for "Azure Active Directory" and then click on "Azure Active Directory"
 <br/>
 <br/>
-    ![AadAppCreate1](AD1.png)
+    ![AadAppCreate1](ad1.png)
 <br/>
 <br/>
-    ![AadAppCreate2](AD2.png)
+    ![AadAppCreate2](ad2.png)
 <br/>
 <br/>
 
     - Click on "App registrations",  then click on "+ New registration"; Fill in the required details as shown below and click "Register"
 <br/>
 <br/>
-    ![AadAppCreate3](AD3.png)
+    ![AadAppCreate3](ad3.png)
 <br/>
 <br/>
-    ![AadAppCreate4](AD4.png)
+    ![AadAppCreate4](ad4.png)
 <br/>
 <br/>
 
     - Go to the Application, click "Certificates & secrets", then click "+ New client secret", Add a description and then click "Add" and save the secret somewhere, you will need to add this to the configuration.
 <br/>
 <br/>
-    ![AadAppCreate5](AD5.png)
+    ![AadAppCreate5](ad5.png)
 <br/>
 <br/>
 
@@ -76,33 +76,33 @@ To do the above tasks, the app will:
     - Go to the resource group created in the step above, and click "+ Add", on the next screen search for "Key Vault" and hit the return key and then click "Create"
 <br/>
 <br/>
-    ![KeyVaultCreate1](KV1.png)
+    ![KeyVaultCreate1](kv1.png)
 <br/>
 <br/>
-    ![KeyVaultCreate2](KV2.png)
+    ![KeyVaultCreate2](kv2.png)
 <br/>
 <br/>
-    ![KeyVaultCreate3](KV3.png)
+    ![KeyVaultCreate3](kv3.png)
 <br/>
 <br/>
 
     - Fill in the required details as shown below and click "Access plolicy", then click "+ Add Access Policy"
 <br/>
 <br/>
-    ![KeyVaultCreate4](KV4.png)
+    ![KeyVaultCreate4](kv4.png)
 <br/>
 <br/>
-    ![KeyVaultCreate5](KV5.png)
+    ![KeyVaultCreate5](kv5.png)
 <br/>
 <br/>
 
     - Fill in the required details and click "Select", then click "Add" and then click "Create"
 <br/>
 <br/>
-    ![KeyVaultCreate6](KV6.png)
+    ![KeyVaultCreate6](kv6.png)
 <br/>
 <br/>
-    ![KeyVaultCreate7](KV7.png)
+    ![KeyVaultCreate7](kv7.png)
 <br/>
 <br/>
 
@@ -110,10 +110,10 @@ To do the above tasks, the app will:
     - Go to the Key Vault and click "Certificates", then click "+ Generate/Import"; Fill in the details as shown below and click "Create"
 <br/>
 <br/>
-    ![KeyVaultCreate8](KV8.png)
+    ![KeyVaultCreate8](kv8.png)
 <br/>
 <br/>
-    ![KeyVaultCreate9](KV9.png)
+    ![KeyVaultCreate9](kv9.png)
 <br/>
 <br/>
 
