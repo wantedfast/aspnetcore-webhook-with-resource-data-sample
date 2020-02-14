@@ -43,15 +43,15 @@ To do the above tasks, the app will:
 - **Step 2**: Create a Resource Group
     - Click on the navigation icon in the Azure Portal, click on "Resource groups"; on the next screen click "+ Add"
 
-![ResourceGroupCreate1](RG1.png)
+![ResourceGroupCreate1](rg1.png)
 
-![ResourceGroupCreate2](RG2.png)
+![ResourceGroupCreate2](rg2.png)
 
     - Fill in the details as shown below and click "Review + create"; on the next screen click "Create"
 
-![ResourceGroupCreate3](RG3.png)
+![ResourceGroupCreate3](rg3.png)
 
-![ResourceGroupCreate4](RG4.png)
+![ResourceGroupCreate4](rg4.png)
 
 - **Step 3**: Create Azure Key Vault
     - Go to the resource group created in the step above, and click "+ Add", on the next screen search for "Key Vault" and hit the return key and then click "Create"
