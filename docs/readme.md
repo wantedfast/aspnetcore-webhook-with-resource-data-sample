@@ -13,9 +13,26 @@ To do the above tasks, the app will:
 - Fetch token for Microsoft Graph to create the subscription.
 - Read a certificate from Azure Key Vault for encryption/decryption.
 
-## Prerequisites
+## Setting up the sample
 
-### Create AAD Application for Key Vault Access
+1. Get an Azure AD appid, and give it the right permissions.
+2. Create a certificate in Azure Key Vault. (You don't need to use Azure Key Vault to use webhooks, but that's how this sample stores its certificates)
+3. Connect Key Vault to your Azure AD appid
+4. Update appsettings.json with information from the previous steps
+
+### Get an Azure AD appid
+
+1. Sign into the Azure [app registration portal](https://go.microsoft.com/fwlink/?linkid=2083908) using either your personal or work or school account.
+2. Choose **New registration** near the top.
+3. Enter a name for the app. Under **Supported account types**, select **Accounts in any organizational directory (Any Azure AD directory - Multitenant)**.
+4. Click **Register**. The app overview page displays, listing the properties of your app.
+5. Copy the value for **Application (client) ID**. This is the unique identifier for your app.
+6. Select the **Certificated & secrets** page. Under **Client secrets**, choose **New client secret**.
+7. Enter a label for the client secret and select an expiration period. Select **Add**.
+8. Copy the value for your new client secret. This is the only time you will be able to see this value. You'll use the application ID and secret to configure the sample app in a later next section.
+9. Select the **API permissions** page. Click **Add a permission**, then select **Microsoft Graph**, **Application permissions**, **ChannelMessage.Read.All**. Click **Add permissions**.
+
+### Get an Azure AD appid
 
 - **Step 1**: Go to [Azure Portal](https://portal.azure.com/).
 
