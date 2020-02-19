@@ -22,18 +22,6 @@ To do the above tasks, the app will:
 
 ### Get an Azure AD appid
 
-1. Sign into the Azure [app registration portal](https://go.microsoft.com/fwlink/?linkid=2083908) using either your personal or work or school account.
-2. Choose **New registration** near the top.
-3. Enter a name for the app. Under **Supported account types**, select **Accounts in any organizational directory (Any Azure AD directory - Multitenant)**.
-4. Click **Register**. The app overview page displays, listing the properties of your app.
-5. Copy the value for **Application (client) ID**. This is the unique identifier for your app.
-6. Select the **Certificated & secrets** page. Under **Client secrets**, choose **New client secret**.
-7. Enter a label for the client secret and select an expiration period. Select **Add**.
-8. Copy the value for your new client secret. This is the only time you will be able to see this value. You'll use the application ID and secret to configure the sample app in a later next section.
-9. Select the **API permissions** page. Click **Add a permission**, then select **Microsoft Graph**, **Application permissions**, **ChannelMessage.Read.All**. Click **Add permissions**.
-
-### Get an Azure AD appid
-
 - **Step 1**: Go to [Azure Portal](https://portal.azure.com/).
 
 - **Step 2**: Create AAD Application
@@ -52,6 +40,8 @@ To do the above tasks, the app will:
 - Go to the Application, click "Certificates & secrets", then click "+ New client secret", Add a description and then click "Add" and save the secret somewhere, you will need to add this to the configuration.
 
 ![AadAppCreate5](ad5.png)
+
+- Select the **API permissions** page. Click **Add a permission**, then select **Microsoft Graph**, **Application permissions**, **ChannelMessage.Read.All**. Click **Add permissions**.
 
 ### Setting up Azure Key Vault
 
@@ -101,33 +91,38 @@ To do the above tasks, the app will:
 ![KeyVaultCreate9](kv9.png)
 
 
-## Setting up and running the application
 
-### Setting up the sample application
+### Connect Key Vault to your Azure AD appid
 
-- **Step 1**: Create an Application in AAD and assign the requested permissions, please note the Application ID and the Application Secret
+1. Go to Access policies under Settings. Click Add Access Policy.
+2. Under Secret Permissions, select Get and List.
+3. Under Certificate Permissions, select Get and List.
+4. Under Select principal, select your appid.
+5. Under Authorized application, select your app. (pro tip: enter the appid in the search box)
+6. Click Add to finish your access policy. Wait for your access policy to deploy.
 
-- **Step 2**: Open the sample in Visual Studio and then open appsettings.json file to update the following settings:
+### Update appsettings.json
+
+- **Step 1**: Open the sample in Visual Studio and then open appsettings.json file to update the following settings:
     - **Mandatory settings under SubscriptonSettigs section**:
         - **ClientID**: Client Id of the AAD Application used to create the Change Notification subscription
         - **ClientSecret**: Client Secret of the AAD Application used to create the Change Notification subscription
         - **TenantIdOrName**: Tenant Id or Tenant Name for which the Change Notification subscription needs to be created (e.g. contoso.onmicrosoft.com)
-        - **NotificationUrl**: The HTTPS Notification URL
+        - **NotificationUrl**: The HTTPS Notification URL. Should end in **/api/Notification**
 
-  - **Mandatory settings under KeyVaultSettings section**:
-        - **ClientId**: Client Id of the application created in the section "Create AAD Application for Key Vault Access" above
-        - **ClientSecret**: Client Secret of the application created in the section "Create AAD Application for Key Vault Access" above
-        - **CertificateUrl**: CertificateUrl of the certificate secret created in the section "Create AAD Application for Key Vault Access" above (e.g. https://changenotificationsample.vault.azure.net/secrets/ChangeNotificationSampleCertificate)
+    - **Mandatory settings under KeyVaultSettings section**:
+          - **ClientId**: Client Id of the application created in the section "Create AAD Application for Key Vault Access" above
+          - **ClientSecret**: Client Secret of the application created in the section "Create AAD Application for Key Vault Access" above
+          - **CertificateUrl**: CertificateUrl of the certificate secret created in the section "Create AAD Application for Key Vault Access" above (e.g. https://changenotificationsample.vault.azure.net/secrets/ChangeNotificationSampleCertificate)
 
-  - **Optional settings under SubscriptionSettings section**:
-        - **ChangeType**: CSV; possible values created, updated, deleted
-        - **Scope**: Production or Canary
-        - **Resource**: resource to create subscription for (e.g. teams/allMessages)
-        - **ClientState**: Some cryptographic string used to validate the Change Notifications
-        - **IncludeProperties**: true or false
-        - **SubscriptionExpirationTimeInMinutes**: Subscription expiration time in minutes, max 60 minutes 
-        - **SubscriptionRenewTimeInMinutes**: Subscription renew time in minutes, max 60 minutes
+    - **Optional settings under SubscriptionSettings section**:
+          - **ChangeType**: CSV; possible values created, updated, deleted
+          - **Resource**: resource to create subscription for (e.g. teams/allMessages)
+          - **ClientState**: Some cryptographic string used to validate the Change Notifications
+          - **IncludeProperties**: true or false
+          - **SubscriptionExpirationTimeInMinutes**: Subscription expiration time in minutes, max 60 minutes 
+          - **SubscriptionRenewTimeInMinutes**: Subscription renew time in minutes, max 60 minutes
 
-- **Step 3**: In the Solution Explorer, right click on the "TeamsGraphChangeNotification" project and select "Set as StartUp Project" and click start (or play button)
+- **Step 2**: In the Solution Explorer, right click on the "TeamsGraphChangeNotification" project and select "Set as StartUp Project" and click start (or play button)
 
-- **Step 4**: Open the Microsoft Teams client and send a message for the resource to which the subscription is created. The message will be received, decrypted and printed on the console.
+- **Step 3**: Open the Microsoft Teams client and send a message for the resource to which the subscription is created. The message will be received, decrypted and printed on the console.
