@@ -22,16 +22,11 @@ namespace TeamsGraphChangeNotification
 
         public async Task<string> GetToken()
         {
-            string scope = SubscriptionOptions.Value.Scope;
             string clientId = SubscriptionOptions.Value.ClientId;
             string clientSecret = SubscriptionOptions.Value.ClientSecret;
             string tenantIdOrName = SubscriptionOptions.Value.TenantIdOrName;
 
             string tokenScope = "https://graph.microsoft.com/.default";
-            if (scope.Equals("canary", StringComparison.OrdinalIgnoreCase))
-            {
-                tokenScope = "https://canary.graph.microsoft.com/.default";
-            }
 
             IConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(clientId)
                 .WithAuthority(AzureCloudInstance.AzurePublic, tenantIdOrName)
