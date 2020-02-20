@@ -12,9 +12,13 @@ namespace TeamsGraphChangeNotification
 
     public class Decryptor
     {
-        private static readonly int AESInitializationVectorSize = new AesCryptoServiceProvider().LegalBlockSizes[0].MinSize;
+        private static readonly Lazy<int> AESInitializationVectorSize = new Lazy<int>(() =>
+        {
+            using var provider = new AesCryptoServiceProvider();
+            return provider.LegalBlockSizes[0].MinSize;
+        });
 
-        public string Decrypt(string encryptedPayload, string encryptedSymmetricKey, string signature, string certificate)
+        public string Decrypt(string encryptedPayload, string encryptedSymmetricKey, string signature, string serializedCertificate)
         {
             if (string.IsNullOrEmpty(encryptedPayload))
             {
@@ -28,12 +32,13 @@ namespace TeamsGraphChangeNotification
             {
                 throw new ArgumentNullException("Signature cannot be null or empty");
             }
-            if (string.IsNullOrEmpty(certificate))
+            if (string.IsNullOrEmpty(serializedCertificate))
             {
                 throw new ArgumentNullException("Certificate cannot be null or empty");
             }
-            RSA rsaPrivateKey = RSACertificateExtensions.GetRSAPrivateKey(new X509Certificate2(Convert.FromBase64String(certificate)));
-            return this.DecryptPayload(encryptedPayload, encryptedSymmetricKey, signature, rsaPrivateKey);
+            using var certificate = new X509Certificate2(Convert.FromBase64String(serializedCertificate));
+            using var rsaPrivateKey = RSACertificateExtensions.GetRSAPrivateKey(certificate);
+            return DecryptPayload(encryptedPayload, encryptedSymmetricKey, signature, rsaPrivateKey);
         }
 
         private string DecryptPayload(string encryptedData, string encryptedSymmetricKey, string signature, RSA asymmetricPrivateKey)
@@ -41,12 +46,13 @@ namespace TeamsGraphChangeNotification
             try
             {
                 byte[] key = asymmetricPrivateKey.Decrypt(Convert.FromBase64String(encryptedSymmetricKey), RSAEncryptionPadding.OaepSHA1);
-                string base64String = Convert.ToBase64String(new HMACSHA256(key).ComputeHash(Convert.FromBase64String(encryptedData)));
+                using var hashAlg = new HMACSHA256(key);
+                string base64String = Convert.ToBase64String(hashAlg.ComputeHash(Convert.FromBase64String(encryptedData)));
                 if (!string.Equals(signature, base64String))
                 {
                     throw new InvalidDataException("Signature does not match");
                 }
-                return Encoding.UTF8.GetString(this.AESDecrypt(Convert.FromBase64String(encryptedData), key));
+                return Encoding.UTF8.GetString(AESDecrypt(Convert.FromBase64String(encryptedData), key));
             }
             catch (Exception ex)
             {
@@ -62,26 +68,24 @@ namespace TeamsGraphChangeNotification
             }
             if (key != null)
             {
-                if (key.Length >= Decryptor.AESInitializationVectorSize / 8)
+                if (key.Length >= AESInitializationVectorSize.Value / 8)
                 {
                     try
                     {
-                        using (AesCryptoServiceProvider cryptoServiceProvider = new AesCryptoServiceProvider())
+                        using var cryptoServiceProvider = new AesCryptoServiceProvider
                         {
-                            cryptoServiceProvider.Mode = CipherMode.CBC;
-                            cryptoServiceProvider.Padding = PaddingMode.PKCS7;
-                            cryptoServiceProvider.Key = key;
-                            byte[] numArray = new byte[Decryptor.AESInitializationVectorSize / 8];
-                            Array.Copy((Array)key, (Array)numArray, numArray.Length);
-                            cryptoServiceProvider.IV = numArray;
-                            using (MemoryStream memoryStream = new MemoryStream())
-                            {
-                                CryptoStream cryptoStream = new CryptoStream((Stream)memoryStream, cryptoServiceProvider.CreateDecryptor(), CryptoStreamMode.Write);
-                                cryptoStream.Write(dataToDecrypt, 0, dataToDecrypt.Length);
-                                cryptoStream.FlushFinalBlock();
-                                return memoryStream.ToArray();
-                            }
-                        }
+                            Mode = CipherMode.CBC,
+                            Padding = PaddingMode.PKCS7,
+                            Key = key
+                        };
+                        byte[] numArray = new byte[AESInitializationVectorSize.Value / 8];
+                        Array.Copy(key, numArray, numArray.Length);
+                        cryptoServiceProvider.IV = numArray;
+                        using var memoryStream = new MemoryStream();
+                        using var cryptoStream = new CryptoStream(memoryStream, cryptoServiceProvider.CreateDecryptor(), CryptoStreamMode.Write);
+                        cryptoStream.Write(dataToDecrypt, 0, dataToDecrypt.Length);
+                        cryptoStream.FlushFinalBlock();
+                        return memoryStream.ToArray();
                     }
                     catch (Exception ex)
                     {
@@ -89,7 +93,7 @@ namespace TeamsGraphChangeNotification
                     }
                 }
             }
-            throw new ArgumentException("Invalid symmetric key:the key size must me at least: " + (Decryptor.AESInitializationVectorSize / 8).ToString());
+            throw new ArgumentException("Invalid symmetric key:the key size must me at least: " + (AESInitializationVectorSize.Value / 8).ToString());
         }
     }
 }

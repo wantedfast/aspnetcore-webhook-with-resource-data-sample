@@ -108,7 +108,7 @@ To do the above tasks, the app will:
         - **ClientID**: Client Id of the AAD Application used to create the Change Notification subscription
         - **ClientSecret**: Client Secret of the AAD Application used to create the Change Notification subscription
         - **TenantIdOrName**: Tenant Id or Tenant Name for which the Change Notification subscription needs to be created (e.g. contoso.onmicrosoft.com)
-        - **NotificationUrl**: The HTTPS Notification URL. Should end in **/api/Notification**
+        - **NotificationUrl**: The HTTPS Notification URL. (if you are debugging locally you can use (ngrok)[https://ngrok.com/] by typing `ngrok http 5000 -host-header=rewrite` in a separate console and use the generated URL eg. https://3a5348f1.ngrok.io )
 
     - **Mandatory settings under KeyVaultSettings section**:
           - **ClientId**: Client Id of the application created in the section "Create AAD Application for Key Vault Access" above

@@ -22,7 +22,7 @@
 
         public async Task<string> GetEncryptionCertificate()
         {
-            await this.GetCertificateFromKeyVault().ConfigureAwait(false);
+            await GetCertificateFromKeyVault().ConfigureAwait(false);
             return EncryptionCertificate;
         }
 
@@ -30,7 +30,7 @@
         {
             if (string.IsNullOrEmpty(DecryptionCertificate))
             {
-                await this.GetCertificateFromKeyVault().ConfigureAwait(false);
+                await GetCertificateFromKeyVault().ConfigureAwait(false);
             }
 
             return DecryptionCertificate;
@@ -40,7 +40,7 @@
         {
             if (string.IsNullOrEmpty(EncryptionCertificateId))
             {
-                await this.GetCertificateFromKeyVault().ConfigureAwait(false);
+                await GetCertificateFromKeyVault().ConfigureAwait(false);
             }
 
             return EncryptionCertificateId;
@@ -54,19 +54,18 @@
                 string clientSecret = KeyVaultOptions.Value.ClientSecret;
                 string certificateUrl = KeyVaultOptions.Value.CertificateUrl;
 
-                KeyVaultClient keyVaultClient = new KeyVaultClient(async (authority, resource, scope) =>
-                {
-                    var adCredential = new ClientCredential(clientId, clientSecret);
-                    var authenticationContext = new AuthenticationContext(authority, null);
-                    return (await authenticationContext.AcquireTokenAsync(resource, adCredential)).AccessToken;
-                });
-
+                using KeyVaultClient keyVaultClient = new KeyVaultClient(async (authority, resource, scope) =>
+                 {
+                     var adCredential = new ClientCredential(clientId, clientSecret);
+                     var authenticationContext = new AuthenticationContext(authority, null);
+                     return (await authenticationContext.AcquireTokenAsync(resource, adCredential)).AccessToken;
+                 });
                 SecretBundle keyVaultCertificatePfx = await keyVaultClient.GetSecretAsync(certificateUrl).ConfigureAwait(false);
                 CertificateBundle keyVaultCertificateCer = await keyVaultClient.GetCertificateAsync(certificateUrl.Replace("/secrets/", "/certificates/", StringComparison.OrdinalIgnoreCase)).ConfigureAwait(false);
 
-                this.DecryptionCertificate = keyVaultCertificatePfx.Value;
-                this.EncryptionCertificate = Convert.ToBase64String(keyVaultCertificateCer.Cer);
-                this.EncryptionCertificateId = keyVaultCertificatePfx.SecretIdentifier.Version;
+                DecryptionCertificate = keyVaultCertificatePfx.Value;
+                EncryptionCertificate = Convert.ToBase64String(keyVaultCertificateCer.Cer);
+                EncryptionCertificateId = keyVaultCertificatePfx.SecretIdentifier.Version;
             }
             catch (Exception ex)
             {
