@@ -23,8 +23,6 @@ namespace TeamsGraphChangeNotification.Controllers
     {
         private readonly KeyVaultManager KeyVaultManager;
         private readonly IOptions<SubscriptionOptions> SubscriptionOptions;
-        private readonly string ContentTypeHeader = "Content-Type";
-        private readonly string ContentTypeHeaderValue = "text/plain";
 
         public NotificationController(
             IOptions<SubscriptionOptions> subscriptionOptions,
@@ -36,16 +34,14 @@ namespace TeamsGraphChangeNotification.Controllers
 
         // POST api/Notification
         [HttpPost]
-        public async Task<IActionResult> Post()
+        public async Task<IActionResult> Post([FromQuery]string validationToken = null)
         {
-            HttpResponseMessage httpResponse = new HttpResponseMessage(HttpStatusCode.OK);
-
-            if (string.IsNullOrEmpty(this.Request.QueryString.Value))
+            if (string.IsNullOrEmpty(validationToken))
             {
                 try
                 {
                     string content = string.Empty;
-                    Stream requestBody = this.Request.Body;
+                    Stream requestBody = Request.Body;
                     using (StreamReader reader = new StreamReader(requestBody))
                     {
                         content = await reader.ReadToEndAsync().ConfigureAwait(false);
@@ -55,18 +51,17 @@ namespace TeamsGraphChangeNotification.Controllers
                     Decryptor encryptor = new Decryptor();
 
                     if (!notification.Value.FirstOrDefault().ClientState.Equals(
-                        this.SubscriptionOptions.Value.ClientState))
+                        SubscriptionOptions.Value.ClientState))
                     {
                         return BadRequest();
                     }
-
-                    if (notification.Value.FirstOrDefault().EncryptedContent != null)
+                    foreach (var notificationItem in notification.Value.Where(x => x.EncryptedContent != null))
                     {
                         string decryptedpublisherNotification =
                         encryptor.Decrypt(
-                            notification.Value.FirstOrDefault().EncryptedContent.Data,
-                            notification.Value.FirstOrDefault().EncryptedContent.DataKey,
-                            notification.Value.FirstOrDefault().EncryptedContent.DataSignature,
+                            notificationItem.EncryptedContent.Data,
+                            notificationItem.EncryptedContent.DataKey,
+                            notificationItem.EncryptedContent.DataSignature,
                             await KeyVaultManager.GetDecryptionCertificate().ConfigureAwait(false));
 
                         Dictionary<string, object> resourceDataObject = JsonConvert.DeserializeObject<Dictionary<string, object>>(decryptedpublisherNotification);
@@ -81,10 +76,8 @@ namespace TeamsGraphChangeNotification.Controllers
 
                 return Ok();
             }
-
-            var encodedString = this.Request.QueryString.Value?.Split('=')[1];
-            var decodedString = System.Web.HttpUtility.UrlDecode(encodedString);
-            return Content(decodedString);
+            else
+                return Content(validationToken);
         }
     }
 }

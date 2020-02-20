@@ -33,7 +33,7 @@ namespace TeamsGraphChangeNotification
                 throw new ArgumentNullException("Certificate cannot be null or empty");
             }
             RSA rsaPrivateKey = RSACertificateExtensions.GetRSAPrivateKey(new X509Certificate2(Convert.FromBase64String(certificate)));
-            return this.DecryptPayload(encryptedPayload, encryptedSymmetricKey, signature, rsaPrivateKey);
+            return DecryptPayload(encryptedPayload, encryptedSymmetricKey, signature, rsaPrivateKey);
         }
 
         private string DecryptPayload(string encryptedData, string encryptedSymmetricKey, string signature, RSA asymmetricPrivateKey)
@@ -46,7 +46,7 @@ namespace TeamsGraphChangeNotification
                 {
                     throw new InvalidDataException("Signature does not match");
                 }
-                return Encoding.UTF8.GetString(this.AESDecrypt(Convert.FromBase64String(encryptedData), key));
+                return Encoding.UTF8.GetString(AESDecrypt(Convert.FromBase64String(encryptedData), key));
             }
             catch (Exception ex)
             {

@@ -8,6 +8,7 @@ namespace TeamsGraphChangeNotification
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Net.Http;
+    using System.Security.Policy;
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
@@ -15,10 +16,10 @@ namespace TeamsGraphChangeNotification
     using Microsoft.Extensions.Options;
     using Models;
     using Newtonsoft.Json;
+    using TeamsGraphChangeNotification.Controllers;
 
-    public class SubscriptionManager : IHostedService
+    public class SubscriptionManager : BackgroundService
     {
-        private Timer _timer;
         private readonly TokenManager TokenManager;
         private readonly KeyVaultManager KeyVaultManager;
         private readonly IOptions<SubscriptionOptions> SubscriptionOptions;
@@ -29,6 +30,7 @@ namespace TeamsGraphChangeNotification
         private readonly string AuthorizationHeader = "Authorization";
         private readonly string GraphSubscriptionUrl = "https://graph.microsoft.com/beta/subscriptions";
         private readonly string CanaryGraphSubscriptionUrl = "https://canary.graph.microsoft.com/beta/subscriptions";
+        private readonly string notificationControllerUrl = $"api/{nameof(NotificationController).ToLower().Replace("controller", string.Empty)}";
 
         public SubscriptionManager(
             TokenManager tokenManager,
@@ -40,28 +42,14 @@ namespace TeamsGraphChangeNotification
             KeyVaultManager = keyVaultManager;
         }
 
-        public async Task StartAsync(CancellationToken cancellationToken)
-        {
-            Trace.TraceInformation("SubscriptionManager has been started");
-            await CreateSubscription().ConfigureAwait(false);
-            _timer = new Timer(
-                async state => await RenewSubscription().ConfigureAwait(false),
-                null,
-                TimeSpan.FromMinutes(29),
-                TimeSpan.FromMinutes(29));
-        }
-
-        public Task StopAsync(CancellationToken cancellationToken)
-        {
-            return Task.CompletedTask;
-        }
-
         public async Task CreateSubscription()
         {
             string resource = SubscriptionOptions.Value.Resource;
             string changeType = SubscriptionOptions.Value.ChangeType;
             string clientState = SubscriptionOptions.Value.ClientState;
             string notificationUrl = SubscriptionOptions.Value.NotificationUrl;
+            if (!notificationUrl.EndsWith(notificationControllerUrl, StringComparison.InvariantCultureIgnoreCase))
+                notificationUrl = new Uri(new Uri(notificationUrl), notificationControllerUrl).AbsoluteUri;
             string encryptionCertificate = await KeyVaultManager.GetEncryptionCertificate().ConfigureAwait(false);
             string encryptionCertificateId = await KeyVaultManager.GetEncryptionCertificateId().ConfigureAwait(false);
             bool includeProperties = bool.Parse(SubscriptionOptions.Value.IncludeProperties);
@@ -69,8 +57,6 @@ namespace TeamsGraphChangeNotification
             string graphSubscriptionBaseUrl = GetGraphSubscriptionBaseUrl();
 
             string expirationTime = DateTime.UtcNow.AddMinutes(int.Parse(SubscriptionOptions.Value.SubscriptionExpirationTimeInMinutes)).ToString("yyyy-MM-ddTHH:mm:ss.fffffffZ");
-            string responseString = string.Empty;
-
             Dictionary<string, string> body = new Dictionary<string, string>
             {
                 { "changeType", changeType },
@@ -85,7 +71,7 @@ namespace TeamsGraphChangeNotification
 
             try
             {
-                responseString = await this.ExecuteHttpRequest(HttpMethod.Post, graphSubscriptionBaseUrl, body).ConfigureAwait(false);
+                string responseString = await ExecuteHttpRequest(HttpMethod.Post, graphSubscriptionBaseUrl, body).ConfigureAwait(false);
                 TeamsSubscription = JsonConvert.DeserializeObject<TeamsSubscription>(responseString);
             }
             catch (Exception ex)
@@ -99,8 +85,6 @@ namespace TeamsGraphChangeNotification
             // Renewing the certificate from key vault every time this is called. You can choose to provide this as a property
             // in the request body. This will help with the certificate renewal process.
             await KeyVaultManager.GetEncryptionCertificate().ConfigureAwait(false);
-
-            string responseString = string.Empty;
             string expirationTime = DateTime.UtcNow.AddMinutes(int.Parse(SubscriptionOptions.Value.SubscriptionExpirationTimeInMinutes)).ToString("yyyy-MM-ddTHH:mm:ss.fffffffZ");
 
             string graphSubscriptionBaseUrl = GetGraphSubscriptionBaseUrl();
@@ -115,7 +99,7 @@ namespace TeamsGraphChangeNotification
 
             try
             {
-                responseString = await this.ExecuteHttpRequest(new HttpMethod(HttpPatchVerb), graphSubscriptionPatchUrl, body).ConfigureAwait(false);
+                string responseString = await ExecuteHttpRequest(new HttpMethod(HttpPatchVerb), graphSubscriptionPatchUrl, body).ConfigureAwait(false);
                 TeamsSubscription = JsonConvert.DeserializeObject<TeamsSubscription>(responseString);
             }
             catch (Exception ex)
@@ -158,6 +142,16 @@ namespace TeamsGraphChangeNotification
             }
 
             return responseString;
+        }
+        protected override async  Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            Trace.TraceInformation("SubscriptionManager has been started");
+            await CreateSubscription().ConfigureAwait(false);
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                await Task.Delay(1740000).ConfigureAwait(false); //29 minutes
+                await RenewSubscription().ConfigureAwait(false);
+            }
         }
     }
 }

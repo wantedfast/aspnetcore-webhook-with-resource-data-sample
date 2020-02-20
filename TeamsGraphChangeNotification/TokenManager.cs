@@ -47,7 +47,7 @@ namespace TeamsGraphChangeNotification
 
             string[] scopes = new string[] { tokenScope };
 
-            AuthenticationResult result = null;
+            AuthenticationResult result;
             try
             {
                 result = await app.AcquireTokenForClient(scopes)

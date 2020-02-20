@@ -6,8 +6,6 @@ namespace TeamsGraphChangeNotification.Models
 {
     public class SubscriptionOptions
     {
-        public SubscriptionOptions() { }
-
         public string Scope { get; set; }
         public string ClientId { get; set; }
         public string ClientSecret { get; set; }
