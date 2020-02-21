@@ -8,7 +8,7 @@ namespace TeamsGraphChangeNotification.Models
     {
         public string ClientId { get; set; }
         public string ClientSecret { get; set; }
-        public string TenantIdOrName { get; set; }
+        public string TenantId { get; set; }
         public string ChangeType { get; set; }
         public string NotificationUrl { get; set; }
         public string Resource { get; set; }
@@ -18,6 +18,5 @@ namespace TeamsGraphChangeNotification.Models
         public string IncludeProperties { get; set; }
         public string SubscriptionExpirationTimeInMinutes { get; set; }
         public string SubscriptionRenewTimeInMinutes { get; set; }
-        public string DecryptionCertificate { get; set; }
     }
 }
