@@ -24,7 +24,7 @@ namespace TeamsGraphChangeNotification
         {
             string clientId = SubscriptionOptions.Value.ClientId;
             string clientSecret = SubscriptionOptions.Value.ClientSecret;
-            string tenantIdOrName = SubscriptionOptions.Value.TenantIdOrName;
+            string tenantIdOrName = SubscriptionOptions.Value.TenantId;
 
             string tokenScope = "https://graph.microsoft.com/.default";
 

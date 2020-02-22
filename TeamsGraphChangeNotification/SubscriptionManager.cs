@@ -114,7 +114,7 @@ namespace TeamsGraphChangeNotification
             await CreateSubscription().ConfigureAwait(false);
             while (!stoppingToken.IsCancellationRequested)
             {
-                await Task.Delay(1740000).ConfigureAwait(false); //29 minutes
+                await Task.Delay(int.Parse(SubscriptionOptions.Value.SubscriptionRenewTimeInMinutes)*60*1000).ConfigureAwait(false);
                 await RenewSubscription().ConfigureAwait(false);
             }
         }

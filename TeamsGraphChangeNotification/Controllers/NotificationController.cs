@@ -49,25 +49,31 @@ namespace TeamsGraphChangeNotification.Controllers
 
                     Notification notification = JsonConvert.DeserializeObject<Notification>(content);
                     Decryptor encryptor = new Decryptor();
+                    TokenValidator tokenValidator = new TokenValidator(SubscriptionOptions.Value.TenantId, new[] { SubscriptionOptions.Value.ClientId });
 
                     if (!notification.Value.FirstOrDefault().ClientState.Equals(
                         SubscriptionOptions.Value.ClientState))
                     {
                         return BadRequest();
                     }
-                    foreach (var notificationItem in notification.Value.Where(x => x.EncryptedContent != null))
-                    {
-                        string decryptedpublisherNotification =
-                        encryptor.Decrypt(
-                            notificationItem.EncryptedContent.Data,
-                            notificationItem.EncryptedContent.DataKey,
-                            notificationItem.EncryptedContent.DataSignature,
-                            await KeyVaultManager.GetDecryptionCertificate().ConfigureAwait(false));
+                    var areValidationTokensValid = (await Task.WhenAll(notification.ValidationTokens.Select(x => tokenValidator.ValidateToken(x))))
+                        .Aggregate((x, y) => x && y);
+                    if (areValidationTokensValid)
+                        foreach (var notificationItem in notification.Value.Where(x => x.EncryptedContent != null))
+                        {
+                            string decryptedpublisherNotification =
+                            encryptor.Decrypt(
+                                notificationItem.EncryptedContent.Data,
+                                notificationItem.EncryptedContent.DataKey,
+                                notificationItem.EncryptedContent.DataSignature,
+                                await KeyVaultManager.GetDecryptionCertificate().ConfigureAwait(false));
 
-                        Dictionary<string, object> resourceDataObject = JsonConvert.DeserializeObject<Dictionary<string, object>>(decryptedpublisherNotification);
+                            Dictionary<string, object> resourceDataObject = JsonConvert.DeserializeObject<Dictionary<string, object>>(decryptedpublisherNotification);
 
-                        Trace.TraceInformation($"Decrypted Notification: {decryptedpublisherNotification}");
-                    }
+                            Trace.TraceInformation($"Decrypted Notification: {decryptedpublisherNotification}");
+                        }
+                    else
+                        return Unauthorized("Token Validation failed");
                 }
                 catch (Exception ex)
                 {
