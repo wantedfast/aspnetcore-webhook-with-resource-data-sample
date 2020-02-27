@@ -10,7 +10,7 @@ namespace TeamsGraphChangeNotification
     using System.Security.Cryptography.X509Certificates;
     using System.Text;
 
-    public class Decryptor
+    public static class Decryptor
     {
         private static readonly Lazy<int> AESInitializationVectorSize = new Lazy<int>(() =>
         {
@@ -18,7 +18,7 @@ namespace TeamsGraphChangeNotification
             return provider.LegalBlockSizes[0].MinSize;
         });
 
-        public string Decrypt(string encryptedPayload, string encryptedSymmetricKey, string signature, string serializedCertificate)
+        public static string Decrypt(string encryptedPayload, string encryptedSymmetricKey, string signature, string serializedCertificate)
         {
             if (string.IsNullOrEmpty(encryptedPayload))
             {
@@ -41,7 +41,7 @@ namespace TeamsGraphChangeNotification
             return DecryptPayload(encryptedPayload, encryptedSymmetricKey, signature, rsaPrivateKey);
         }
 
-        private string DecryptPayload(string encryptedData, string encryptedSymmetricKey, string signature, RSA asymmetricPrivateKey)
+        private static string DecryptPayload(string encryptedData, string encryptedSymmetricKey, string signature, RSA asymmetricPrivateKey)
         {
             try
             {
@@ -60,7 +60,7 @@ namespace TeamsGraphChangeNotification
             }
         }
 
-        private byte[] AESDecrypt(byte[] dataToDecrypt, byte[] key)
+        private static byte[] AESDecrypt(byte[] dataToDecrypt, byte[] key)
         {
             if (dataToDecrypt == null)
             {

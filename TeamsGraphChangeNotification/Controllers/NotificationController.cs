@@ -48,7 +48,6 @@ namespace TeamsGraphChangeNotification.Controllers
                     }
 
                     Notification notification = JsonConvert.DeserializeObject<Notification>(content);
-                    Decryptor encryptor = new Decryptor();
                     TokenValidator tokenValidator = new TokenValidator(SubscriptionOptions.Value.TenantId, new[] { SubscriptionOptions.Value.ClientId });
 
                     if (!notification.Value.FirstOrDefault().ClientState.Equals(
@@ -62,7 +61,7 @@ namespace TeamsGraphChangeNotification.Controllers
                         foreach (var notificationItem in notification.Value.Where(x => x.EncryptedContent != null))
                         {
                             string decryptedpublisherNotification =
-                            encryptor.Decrypt(
+                            Decryptor.Decrypt(
                                 notificationItem.EncryptedContent.Data,
                                 notificationItem.EncryptedContent.DataKey,
                                 notificationItem.EncryptedContent.DataSignature,
