@@ -68,7 +68,7 @@ namespace TeamsGraphChangeNotification.Controllers
                                 await KeyVaultManager.GetDecryptionCertificate().ConfigureAwait(false));
 
                             Dictionary<string, object> resourceDataObject = JsonConvert.DeserializeObject<Dictionary<string, object>>(decryptedpublisherNotification);
-
+                            Console.WriteLine($"Decrypted Notification: {decryptedpublisherNotification}"); // hack -- use Trace
                             Trace.TraceInformation($"Decrypted Notification: {decryptedpublisherNotification}");
                         }
                     else
