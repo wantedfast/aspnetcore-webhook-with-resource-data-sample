@@ -1,4 +1,8 @@
-﻿namespace TeamsGraphChangeNotification
+﻿// <copyright file="KeyVaultManager.cs" company="Microsoft">
+// Copyright (c) Microsoft. All rights reserved.
+// </copyright>
+
+namespace TeamsGraphChangeNotification
 {
     using System;
     using System.Threading.Tasks;
@@ -22,15 +26,17 @@
 
         public async Task<string> GetEncryptionCertificate()
         {
-            await GetCertificateFromKeyVault().ConfigureAwait(false);
-            return EncryptionCertificate;
+            // Always renewing the certificate when creating or renewing the subscription so that the certificate
+            // can be rotated/changed in key vault without having to restart the application
+            await this.GetCertificateFromKeyVault().ConfigureAwait(false);
+            return this.EncryptionCertificate;
         }
 
         public async Task<string> GetDecryptionCertificate()
         {
             if (string.IsNullOrEmpty(DecryptionCertificate))
             {
-                await GetCertificateFromKeyVault().ConfigureAwait(false);
+                await this.GetCertificateFromKeyVault().ConfigureAwait(false);
             }
 
             return DecryptionCertificate;
@@ -38,12 +44,12 @@
 
         public async Task<string> GetEncryptionCertificateId()
         {
-            if (string.IsNullOrEmpty(EncryptionCertificateId))
+            if (string.IsNullOrEmpty(this.EncryptionCertificateId))
             {
-                await GetCertificateFromKeyVault().ConfigureAwait(false);
+                await this.GetCertificateFromKeyVault().ConfigureAwait(false);
             }
 
-            return EncryptionCertificateId;
+            return this.EncryptionCertificateId;
         }
 
         private async Task GetCertificateFromKeyVault()
@@ -56,16 +62,16 @@
 
                 using KeyVaultClient keyVaultClient = new KeyVaultClient(async (authority, resource, scope) =>
                  {
-                     var adCredential = new ClientCredential(clientId, clientSecret);
-                     var authenticationContext = new AuthenticationContext(authority, null);
+                     ClientCredential adCredential = new ClientCredential(clientId, clientSecret);
+                     AuthenticationContext authenticationContext = new AuthenticationContext(authority, null);
                      return (await authenticationContext.AcquireTokenAsync(resource, adCredential)).AccessToken;
                  });
                 SecretBundle keyVaultCertificatePfx = await keyVaultClient.GetSecretAsync(certificateUrl).ConfigureAwait(false);
                 CertificateBundle keyVaultCertificateCer = await keyVaultClient.GetCertificateAsync(certificateUrl.Replace("/secrets/", "/certificates/", StringComparison.OrdinalIgnoreCase)).ConfigureAwait(false);
 
                 DecryptionCertificate = keyVaultCertificatePfx.Value;
-                EncryptionCertificate = Convert.ToBase64String(keyVaultCertificateCer.Cer);
-                EncryptionCertificateId = keyVaultCertificatePfx.SecretIdentifier.Version;
+                this.EncryptionCertificate = Convert.ToBase64String(keyVaultCertificateCer.Cer);
+                this.EncryptionCertificateId = keyVaultCertificatePfx.SecretIdentifier.Version;
             }
             catch (Exception ex)
             {
