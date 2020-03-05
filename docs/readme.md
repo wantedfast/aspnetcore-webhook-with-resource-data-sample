@@ -1,4 +1,4 @@
-![.NET Core](https://github.com/microsoftgraph/csharp-webhook-with-resource-data/workflows/.NET%20Core/badge.svg)
+![.NET Core](https://github.com/microsoftgraph/csharp-webhook-with-resource-data/workflows/.NET%20Core/badge.svg?branch=master)
 # Sample Application - Microsoft Teams Graph Change Notifications
 
 ## Use this sample application to receive Change Notifications for Microsoft Teams
