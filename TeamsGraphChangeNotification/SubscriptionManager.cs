@@ -6,116 +6,185 @@ namespace TeamsGraphChangeNotification
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Net.Http;
+    using System.Linq;
     using System.Net.Http.Headers;
-    using System.Security.Policy;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Options;
     using Microsoft.Graph;
     using Models;
-    using Newtonsoft.Json;
     using TeamsGraphChangeNotification.Controllers;
 
     public class SubscriptionManager : BackgroundService
     {
+        private GraphServiceClient _client;
         private readonly TokenManager TokenManager;
         private readonly KeyVaultManager KeyVaultManager;
         private readonly IOptions<SubscriptionOptions> SubscriptionOptions;
-        private Subscription TeamsSubscription;
-        private readonly string notificationControllerUrl = $"api/{nameof(NotificationController).ToLower().Replace("controller", string.Empty)}";
+        private readonly Dictionary<string, Subscription> TeamsSubscriptions = new Dictionary<string, Subscription>();
+        private readonly string NotificationControllerUrl = $"api/{nameof(NotificationController).ToLower().Replace("controller", string.Empty)}";
 
         public SubscriptionManager(
             TokenManager tokenManager,
             IOptions<SubscriptionOptions> subscriptionOptions,
             KeyVaultManager keyVaultManager)
         {
-            TokenManager = tokenManager;
-            SubscriptionOptions = subscriptionOptions;
-            KeyVaultManager = keyVaultManager;
+            this.TokenManager = tokenManager;
+            this.SubscriptionOptions = subscriptionOptions;
+            this.KeyVaultManager = keyVaultManager;
         }
 
-        public async Task CreateSubscription()
+        protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
-            string resource = SubscriptionOptions.Value.Resource;
-            string changeType = SubscriptionOptions.Value.ChangeType;
-            string clientState = SubscriptionOptions.Value.ClientState;
-            string notificationUrl = SubscriptionOptions.Value.NotificationUrl;
-            if (!notificationUrl.EndsWith(notificationControllerUrl, StringComparison.InvariantCultureIgnoreCase))
-                notificationUrl = new Uri(new Uri(notificationUrl), notificationControllerUrl).AbsoluteUri;
-            string encryptionCertificate = await KeyVaultManager.GetEncryptionCertificate().ConfigureAwait(false);
-            string encryptionCertificateId = await KeyVaultManager.GetEncryptionCertificateId().ConfigureAwait(false);
-            bool includeProperties = bool.Parse(SubscriptionOptions.Value.IncludeProperties);
+            Console.WriteLine("SubscriptionManager has been started");
 
-            var subscription = new Subscription
+            await this.GetSubscriptions().ConfigureAwait(false);
+            await this.CreateSubscriptions().ConfigureAwait(false);
+            
+            while (!cancellationToken.IsCancellationRequested)
             {
-                ChangeType = changeType,
-                NotificationUrl = notificationUrl,
-                Resource = resource,
-                ExpirationDateTime = new DateTimeOffset(DateTime.UtcNow.AddMinutes(int.Parse(SubscriptionOptions.Value.SubscriptionExpirationTimeInMinutes)), TimeSpan.Zero),
-                ClientState = clientState,
-                EncryptionCertificate = encryptionCertificate,
-                EncryptionCertificateId = encryptionCertificateId,
-                IncludeProperties = includeProperties
-            };
+                await Task.Delay(TimeSpan.FromMinutes(int.Parse(this.SubscriptionOptions.Value.SubscriptionRenewTimeInMinutes)), cancellationToken).ConfigureAwait(false);
+                await this.RenewSubscriptions().ConfigureAwait(false);
+            }
+        }
 
+        private async Task GetSubscriptions()
+        {
             try
             {
-                TeamsSubscription = await Client.Subscriptions.Request().AddAsync(subscription).ConfigureAwait(false);
+                IGraphServiceSubscriptionsCollectionPage subscriptionCollectionPage = await this.Client.Subscriptions.Request().GetAsync().ConfigureAwait(false);
+                IGraphServiceSubscriptionsCollectionRequest subscriptionsNextpageRequest = subscriptionCollectionPage.NextPageRequest;
+
+                foreach (Subscription subscription in subscriptionCollectionPage.CurrentPage)
+                {
+                    this.TeamsSubscriptions.TryAdd(subscription.Id, subscription);
+                }
+
+                while (subscriptionsNextpageRequest != null)
+                {
+                    IGraphServiceSubscriptionsCollectionPage subscriptionsNextPage = await subscriptionsNextpageRequest.GetAsync().ConfigureAwait(false);
+                    subscriptionsNextpageRequest = subscriptionsNextPage.NextPageRequest;
+
+                    foreach (Subscription subscription in subscriptionsNextPage.CurrentPage)
+                    {
+                        this.TeamsSubscriptions.TryAdd(subscription.Id, subscription);
+                    }
+                }
+
+                await this.RenewSubscriptions().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                Trace.TraceError($"Exception while Creating Subscription: {ex}");
+                Console.WriteLine($"Exception while getting exisiting subscriptions: {ex}");
             }
         }
-        public async Task RenewSubscription()
+
+        private async Task CreateSubscriptions()
+        {
+            string resources = this.SubscriptionOptions.Value.Resource;
+            List<string> resourceList = resources.Split(",", StringSplitOptions.RemoveEmptyEntries).ToList();
+
+            string changeType = this.SubscriptionOptions.Value.ChangeType;
+            string clientState = this.SubscriptionOptions.Value.ClientState;
+            string notificationUrl = this.SubscriptionOptions.Value.NotificationUrl;
+            string encryptionCertificate = await this.KeyVaultManager.GetEncryptionCertificate().ConfigureAwait(false);
+            string encryptionCertificateId = await this.KeyVaultManager.GetEncryptionCertificateId().ConfigureAwait(false);
+            bool includeProperties = bool.Parse(this.SubscriptionOptions.Value.IncludeProperties);
+            int subscriptionExpirationTimeInMinutes = int.Parse(this.SubscriptionOptions.Value.SubscriptionExpirationTimeInMinutes);
+
+            if (subscriptionExpirationTimeInMinutes > 60)
+            {
+                subscriptionExpirationTimeInMinutes = 60;
+            }
+
+            if (!notificationUrl.EndsWith(this.NotificationControllerUrl, StringComparison.InvariantCultureIgnoreCase))
+            {
+                notificationUrl = new Uri(new Uri(notificationUrl), this.NotificationControllerUrl).AbsoluteUri;
+            }
+
+            // Find resources for which subscription does not exist so that we can create new subscriptions for those resources
+            List<string> existingSubscriptionResource = new List<Subscription>(this.TeamsSubscriptions.Values).Select(s => s.Resource).ToList();
+            List<string> resourcesToCreateSubscriptionsFor = resourceList.Except(existingSubscriptionResource).ToList();
+
+            foreach (string resource in resourcesToCreateSubscriptionsFor)
+            {
+                Subscription subscription = new Subscription
+                {
+                    ChangeType = changeType,
+                    NotificationUrl = notificationUrl,
+                    Resource = resource,
+                    ExpirationDateTime = new DateTimeOffset(DateTime.UtcNow.AddMinutes(subscriptionExpirationTimeInMinutes), TimeSpan.Zero),
+                    ClientState = clientState,
+                    EncryptionCertificate = encryptionCertificate,
+                    EncryptionCertificateId = encryptionCertificateId,
+                    IncludeProperties = includeProperties
+                };
+
+                try
+                {
+                    Subscription teamsSubscription = await this.Client.Subscriptions.Request().AddAsync(subscription).ConfigureAwait(false);
+
+                    if (!this.TeamsSubscriptions.ContainsKey(teamsSubscription.Id))
+                    {
+                        this.TeamsSubscriptions.TryAdd(teamsSubscription.Id, teamsSubscription);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Exception while Creating Subscription: {ex}");
+                }
+            }
+        }
+
+        private async Task RenewSubscriptions()
         {
             // Renewing the certificate from key vault every time this is called. You can choose to provide this as a property
             // in the request body. This will help with the certificate renewal process.
-            await KeyVaultManager.GetEncryptionCertificate().ConfigureAwait(false);
+            await this.KeyVaultManager.GetEncryptionCertificate().ConfigureAwait(false);
             try
             {
-                TeamsSubscription = await Client.Subscriptions[TeamsSubscription.Id].Request().UpdateAsync(new Subscription
+                List<string> subscriptionIdsToRenew = new List<string>(this.TeamsSubscriptions.Keys);
+                foreach (string subscriptionId in subscriptionIdsToRenew)
                 {
-                    ExpirationDateTime = new DateTimeOffset(DateTime.UtcNow.AddMinutes(int.Parse(SubscriptionOptions.Value.SubscriptionExpirationTimeInMinutes)), TimeSpan.Zero)
-                }).ConfigureAwait(false);
+                    Subscription teamsSubscription = await Client.Subscriptions[subscriptionId].Request().UpdateAsync(new Subscription
+                    {
+                        ExpirationDateTime = new DateTimeOffset(DateTime.UtcNow.AddMinutes(int.Parse(this.SubscriptionOptions.Value.SubscriptionExpirationTimeInMinutes)), TimeSpan.Zero)
+                    }).ConfigureAwait(false);
+
+                    if (this.TeamsSubscriptions.ContainsKey(teamsSubscription.Id))
+                    {
+                        this.TeamsSubscriptions[subscriptionId] = teamsSubscription;
+                    }
+                    else
+                    {
+                        this.TeamsSubscriptions.TryAdd(teamsSubscription.Id, teamsSubscription);
+                    }
+                }
             }
             catch (Exception ex)
             {
-                Trace.TraceError($"Exception while Renewing Subscription: {ex}");
+                Console.WriteLine($"Exception while Renewing Subscription: {ex}");
             }
         }
-        private GraphServiceClient _client;
+
         private GraphServiceClient Client
         {
             get
             {
-                if (_client == null)
-                    _client = new GraphServiceClient(new DelegateAuthenticationProvider(async (requestMessage) =>
+                if (this._client == null)
+                {
+                    this._client = new GraphServiceClient(new DelegateAuthenticationProvider(async (requestMessage) =>
                     {
-
-                    // get an access token for Graph
-                    var token = await TokenManager.GetToken().ConfigureAwait(false);
+                        // get an access token for Graph
+                        string token = await this.TokenManager.GetToken().ConfigureAwait(false);
 
                         requestMessage
                             .Headers
                             .Authorization = new AuthenticationHeaderValue("bearer", token);
-
                     }));
-                return _client;
-            }
-        }
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-        {
-            Trace.TraceInformation("SubscriptionManager has been started");
-            await CreateSubscription().ConfigureAwait(false);
-            while (!stoppingToken.IsCancellationRequested)
-            {
-                await Task.Delay(int.Parse(SubscriptionOptions.Value.SubscriptionRenewTimeInMinutes)*60*1000).ConfigureAwait(false);
-                await RenewSubscription().ConfigureAwait(false);
+                }
+                return this._client;
             }
         }
     }

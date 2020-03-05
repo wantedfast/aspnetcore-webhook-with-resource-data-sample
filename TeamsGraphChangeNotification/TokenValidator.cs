@@ -1,37 +1,41 @@
-﻿using Microsoft.IdentityModel.Protocols;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IdentityModel.Tokens.Jwt;
-using System.Threading.Tasks;
+﻿// <copyright file="TokenValidator.cs" company="Microsoft">
+// Copyright (c) Microsoft. All rights reserved.
+// </copyright>
 
 namespace TeamsGraphChangeNotification
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IdentityModel.Tokens.Jwt;
+    using System.Threading.Tasks;
+    using Microsoft.IdentityModel.Protocols;
+    using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+    using Microsoft.IdentityModel.Tokens;
+
     public class TokenValidator
     {
+        private readonly string TenantId;
+        private readonly IEnumerable<string> AppIds;
         private static readonly string issuerPrefix = "https://sts.windows.net/";
         private static readonly string wellKnownUri = "https://login.microsoftonline.com/common/.well-known/openid-configuration";
-        private readonly string _tenantId;
-        private readonly IEnumerable<string> _appIds;
-        private string issuerToValidate
+
+        private string IssuerToValidate
         {
             get
             {
-                return $"{issuerPrefix}{_tenantId}/";
+                return $"{TokenValidator.issuerPrefix}{this.TenantId}/";
             }
         }
         public TokenValidator(string tenantId, IEnumerable<string> appIds)
         {
-            _tenantId = tenantId ?? throw new ArgumentNullException(nameof(tenantId));
-            _appIds = appIds ?? throw new ArgumentNullException(nameof(appIds));
+            this.TenantId = tenantId ?? throw new ArgumentNullException(nameof(tenantId));
+            this.AppIds = appIds ?? throw new ArgumentNullException(nameof(appIds));
         }
         public async Task<bool> ValidateToken(string token)
         {
-            var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(wellKnownUri, new OpenIdConnectConfigurationRetriever());
-            var openIdConfig = await configurationManager.GetConfigurationAsync();
-            var handler = new JwtSecurityTokenHandler();
+            ConfigurationManager<OpenIdConnectConfiguration> configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(TokenValidator.wellKnownUri, new OpenIdConnectConfigurationRetriever());
+            OpenIdConnectConfiguration openIdConfig = await configurationManager.GetConfigurationAsync();
+            JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
             try
             {
                 handler.ValidateToken(token, new TokenValidationParameters
@@ -40,15 +44,15 @@ namespace TeamsGraphChangeNotification
                     ValidateAudience = true,
                     ValidateIssuerSigningKey = true,
                     ValidateLifetime = true,
-                    ValidIssuer = issuerToValidate,
-                    ValidAudiences = _appIds,
+                    ValidIssuer = this.IssuerToValidate,
+                    ValidAudiences = this.AppIds,
                     IssuerSigningKeys = openIdConfig.SigningKeys
                 }, out _);
                 return true;
             }
             catch (Exception ex)
             {
-                Trace.TraceError($"{ex.Message}:{ex.StackTrace}");
+                Console.WriteLine($"{ex.Message}:{ex.StackTrace}");
                 return false;
             }
         }

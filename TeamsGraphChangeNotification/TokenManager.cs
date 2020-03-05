@@ -5,7 +5,6 @@
 namespace TeamsGraphChangeNotification
 {
     using System;
-    using System.Diagnostics;
     using System.Threading.Tasks;
     using Microsoft.Extensions.Options;
     using Microsoft.Identity.Client;
@@ -17,14 +16,14 @@ namespace TeamsGraphChangeNotification
 
         public TokenManager(IOptions<SubscriptionOptions> subscriptionOptions)
         {
-            SubscriptionOptions = subscriptionOptions;
+            this.SubscriptionOptions = subscriptionOptions;
         }
 
         public async Task<string> GetToken()
         {
-            string clientId = SubscriptionOptions.Value.ClientId;
-            string clientSecret = SubscriptionOptions.Value.ClientSecret;
-            string tenantIdOrName = SubscriptionOptions.Value.TenantId;
+            string clientId = this.SubscriptionOptions.Value.ClientId;
+            string clientSecret = this.SubscriptionOptions.Value.ClientSecret;
+            string tenantIdOrName = this.SubscriptionOptions.Value.TenantId;
 
             string tokenScope = "https://graph.microsoft.com/.default";
 
@@ -35,7 +34,7 @@ namespace TeamsGraphChangeNotification
 
             // Use the following for certificates
             // X509Certificate2 certificate = ReadCertificate(config.CertificateName);
-            // var app = ConfidentialClientApplicationBuilder.Create(config.ClientId)
+            // IConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(config.ClientId)
             //           .WithAuthority(AzureCloudInstance.AzurePublic, "{tenantID}")
             //           .WithCertificate(config.ClientSecret)
             //           .Build();
@@ -50,7 +49,7 @@ namespace TeamsGraphChangeNotification
             }
             catch (MsalServiceException ex)
             {
-                Trace.TraceError($"Exception while acquireing token {ex}");
+                Console.WriteLine($"Exception while acquireing token {ex}");
                 throw;
             }
 
