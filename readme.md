@@ -1,4 +1,19 @@
+---
+page_type: sample 
+products:
+- ms-graph
+languages:
+- aspnet
+- csharp
+description: "Create Microsoft Graph webhook subscriptions for a ASP.NET Core app, so that it can receive notifications of changes for any resource. This sample also supports receiving change notifications with data, validating and decrypting the payload."
+extensions:
+  contentType: samples
+  technologies:
+  - Microsoft Graph
+  createdDate: 3/15/2020 4:12:18 PM
+---
 ![.NET Core](https://github.com/microsoftgraph/csharp-webhook-with-resource-data/workflows/.NET%20Core/badge.svg?branch=master)
+
 # Sample Application - Microsoft Teams Graph Change Notifications
 
 ## Use this sample application to receive Change Notifications for Microsoft Teams
@@ -6,11 +21,13 @@
 ### How the sample application works
 
 The sample is configured to do the following:
+
 - On start up, create a subscription to receive Change Notifications from Microsoft Teams.
 - Periodically (on a scheduled timer) extend the subscription.
 - Once an encrypted Change Notification is received, decrypt it and print it to console.
 
 To do the above tasks, the app will:
+
 - Fetch token for Microsoft Graph to create the subscription.
 - Read a certificate from Azure Key Vault for encryption/decryption.
 
@@ -28,19 +45,19 @@ To do the above tasks, the app will:
 - **Step 2**: Create AAD Application
     - Click on the navigation icon in the Azure Portal, click on "All services"; on the next screen search for "Azure Active Directory" and then click on "Azure Active Directory"
 
-![AadAppCreate1](ad1.png)
+    ![AadAppCreate1](docs/ad1.png)
 
-![AadAppCreate2](ad2.png)
+    ![AadAppCreate2](docs/ad2.png)
 
 - Click on "App registrations",  then click on "+ New registration"; Fill in the required details as shown below and click "Register"
 
-![AadAppCreate3](ad3.png)
+    ![AadAppCreate3](docs/ad3.png)
 
-![AadAppCreate4](ad4.png)
+    ![AadAppCreate4](docs/ad4.png)
 
 - Go to the Application, click "Certificates & secrets", then click "+ New client secret", Add a description and then click "Add" and save the secret somewhere, you will need to add this to the configuration.
 
-![AadAppCreate5](ad5.png)
+    ![AadAppCreate5](docs/ad5.png)
 
 - Select the **API permissions** page. Click **Add a permission**, then select **Microsoft Graph**, **Application permissions**, **ChannelMessage.Read.All**. Click **Add permissions**.
 
@@ -51,47 +68,42 @@ To do the above tasks, the app will:
 - **Step 2**: Create a Resource Group
     - Click on the navigation icon in the Azure Portal, click on "Resource groups"; on the next screen click "+ Add"
 
-![ResourceGroupCreate1](rg1.png)
+    ![ResourceGroupCreate1](docs/rg1.png)
 
-![ResourceGroupCreate2](rg2.png)
+    ![ResourceGroupCreate2](docs/rg2.png)
 
 - Fill in the details as shown below and click "Review + create"; on the next screen click "Create"
 
-![ResourceGroupCreate3](rg3.png)
+    ![ResourceGroupCreate3](docs/rg3.png)
 
-![ResourceGroupCreate4](rg4.png)
+    ![ResourceGroupCreate4](docs/rg4.png)
 
 - **Step 3**: Create Azure Key Vault
     - Go to the resource group created in the step above, and click "+ Add", on the next screen search for "Key Vault" and hit the return key and then click "Create"
 
-![KeyVaultCreate1](kv1.png)
+    ![KeyVaultCreate1](docs/kv1.png)
 
-![KeyVaultCreate2](kv2.png)
+    ![KeyVaultCreate2](docs/kv2.png)
 
-![KeyVaultCreate3](kv3.png)
-
+    ![KeyVaultCreate3](docs/kv3.png)
 
 - Fill in the required details as shown below and click "Access plolicy", then click "+ Add Access Policy"
-![KeyVaultCreate4](kv4.png)
+    ![KeyVaultCreate4](docs/kv4.png)
 
-![KeyVaultCreate5](kv5.png)
-
+    ![KeyVaultCreate5](docs/kv5.png)
 
 - Fill in the required details and click "Select", then click "Add" and then click "Create"
 
-![KeyVaultCreate6](kv6.png)
+    ![KeyVaultCreate6](docs/kv6.png)
 
-![KeyVaultCreate7](kv7.png)
-
+    ![KeyVaultCreate7](docs/kv7.png)
 
 - **Step 4**: Create Self-Signed certificate
     - Go to the Key Vault and click "Certificates", then click "+ Generate/Import"; Fill in the details as shown below and click "Create"
 
-![KeyVaultCreate8](kv8.png)
+    ![KeyVaultCreate8](docs/kv8.png)
 
-![KeyVaultCreate9](kv9.png)
-
-
+    ![KeyVaultCreate9](docs/kv9.png)
 
 ### Connect Key Vault to your Azure AD appid
 
