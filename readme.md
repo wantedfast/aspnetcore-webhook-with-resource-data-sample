@@ -2,8 +2,14 @@
 page_type: sample 
 products:
 - ms-graph
+products:
+- ms-graph
+- office-teams
+- office-sp
+- office-outlook
+- m365
 languages:
-- aspnet
+- aspx-csharp
 - csharp
 description: "Create Microsoft Graph webhook subscriptions for a ASP.NET Core app, so that it can receive notifications of changes for any resource. This sample also supports receiving change notifications with data, validating and decrypting the payload."
 extensions:
