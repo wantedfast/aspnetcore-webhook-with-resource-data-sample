@@ -15,7 +15,7 @@ namespace TeamsGraphChangeNotification.Models
         public string ClientState { get; set; }
         public string EncryptionCertificate { get; set; }
         public string EncryptionCertificateId { get; set; }
-        public string IncludeProperties { get; set; }
+        public string IncludeResourceData { get; set; }
         public string SubscriptionExpirationTimeInMinutes { get; set; }
         public string SubscriptionRenewTimeInMinutes { get; set; }
     }

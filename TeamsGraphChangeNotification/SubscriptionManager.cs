@@ -90,7 +90,7 @@ namespace TeamsGraphChangeNotification
             string notificationUrl = this.SubscriptionOptions.Value.NotificationUrl;
             string encryptionCertificate = await this.KeyVaultManager.GetEncryptionCertificate().ConfigureAwait(false);
             string encryptionCertificateId = await this.KeyVaultManager.GetEncryptionCertificateId().ConfigureAwait(false);
-            bool includeProperties = bool.Parse(this.SubscriptionOptions.Value.IncludeProperties);
+            bool includeResourceData = bool.Parse(this.SubscriptionOptions.Value.IncludeResourceData);
             int subscriptionExpirationTimeInMinutes = int.Parse(this.SubscriptionOptions.Value.SubscriptionExpirationTimeInMinutes);
 
             if (subscriptionExpirationTimeInMinutes > 60)
@@ -118,7 +118,7 @@ namespace TeamsGraphChangeNotification
                     ClientState = clientState,
                     EncryptionCertificate = encryptionCertificate,
                     EncryptionCertificateId = encryptionCertificateId,
-                    IncludeProperties = includeProperties
+                    IncludeResourceData = includeResourceData
                 };
 
                 try
