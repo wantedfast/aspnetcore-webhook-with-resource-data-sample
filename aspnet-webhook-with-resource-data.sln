@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.960
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TeamsGraphChangeNotification", "TeamsGraphChangeNotification\TeamsGraphChangeNotification.csproj", "{AE32AAE5-37BA-4675-99FD-1DC5FE706374}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphChangeNotification", "GraphChangeNotification\GraphChangeNotification.csproj", "{AE32AAE5-37BA-4675-99FD-1DC5FE706374}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -356,12 +356,6 @@ MigrationBackup/
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
-/.vs/csharp-webhook-with-resource-data/v16/Server/sqlite3
-/TeamsGraphChangeNotification/bin/Debug/netcoreapp2.2
-/TeamsGraphChangeNotification/obj
-/.vs/csharp-webhook-with-resource-data/DesignTimeBuild
-/.vs/csharp-webhook-with-resource-data/v16/.suo
-/.vs/csharp-webhook-with-resource-data/v15/Server/sqlite3/storage.ide-wal
-/.vs/csharp-webhook-with-resource-data/v15/Server/sqlite3/storage.ide-shm
-/.vs/csharp-webhook-with-resource-data/v15/Server/sqlite3/storage.ide
-/.vs/csharp-webhook-with-resource-data/v15/Server/sqlite3/db.lock
+/.vs/**/*
+/**/bin/Debug/**/*
+/**/obj/**/*

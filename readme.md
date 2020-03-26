@@ -20,22 +20,26 @@ extensions:
 ---
 ![.NET Core](https://github.com/microsoftgraph/csharp-webhook-with-resource-data/workflows/.NET%20Core/badge.svg?branch=master)
 
-# Sample Application - Microsoft Teams Graph Change Notifications
+# Sample Application - Microsoft Graph Change Notifications
 
-## Use this sample application to receive Change Notifications for Microsoft Teams
+Subscribe for [Microsoft Graph change notifications](https://docs.microsoft.com/graph/webhooks) to be notified when your user's data changes so you don't have to poll for changes.
+
+This ASP.NET core sample shows how to start getting notifications from Microsoft Graph. Microsoft Graph provides a unified API endpoint to access data from Microsoft 365.
+
+## Use this sample application to receive Change Notifications for Microsoft Graph
 
 ### How the sample application works
 
 The sample is configured to do the following:
 
-- On start up, create a subscription to receive Change Notifications from Microsoft Teams.
+- On start up, create a subscription to receive Change Notifications from Microsoft Graph.
 - Periodically (on a scheduled timer) extend the subscription.
-- Once an encrypted Change Notification is received, decrypt it and print it to console.
+- Once a Change Notification is received with encrypted data, decrypt it and print it to console. (only with supported resources)
 
 To do the above tasks, the app will:
 
 - Fetch token for Microsoft Graph to create the subscription.
-- Read a certificate from Azure Key Vault for encryption/decryption.
+- Read a certificate from Azure Key Vault for encryption/decryption. (only with supported resources)
 
 ## Setting up the sample
 
@@ -67,7 +71,11 @@ To do the above tasks, the app will:
 
 - Select the **API permissions** page. Click **Add a permission**, then select **Microsoft Graph**, **Application permissions**, **ChannelMessage.Read.All**. Click **Add permissions**.
 
+*Note: for other resources you might need to select different permissions as documented [here](https://docs.microsoft.com/graph/api/subscription-post-subscriptions?view=graph-rest-beta&tabs=http#permissions)*
+
 ### Setting up Azure Key Vault
+
+*Note: you are only required to follow these steps if the resource you are subscribing to supports including resouces data in notifications and if you set `includeResourceData` to `true` in the configuration. In any other case, you can skip these steps. Refer to [the documentation](https://docs.microsoft.com/graph/api/resources/webhooks?view=graph-rest-beta) for a complete list of resources that support or not including resources data.*  
 
 - **Step 1**: Go to [Azure Portal](https://portal.azure.com/).
 
@@ -113,6 +121,8 @@ To do the above tasks, the app will:
 
 ### Connect Key Vault to your Azure AD appid
 
+*Note: you are only required to follow these steps if the resource you are subscribing to supports including resouces data in notifications and if you set `includeResourceData` to `true` in the configuration. In any other case, you can skip these steps. Refer to [the documentation](https://docs.microsoft.com/graph/api/resources/webhooks?view=graph-rest-beta) for a complete list of resources that support or not including resources data.*  
+
 1. Go to Access policies under Settings. Click Add Access Policy.
 2. Under Secret Permissions, select Get and List.
 3. Under Certificate Permissions, select Get and List.
@@ -127,21 +137,22 @@ To do the above tasks, the app will:
         - **ClientID**: Client Id of the AAD Application used to create the Change Notification subscription
         - **ClientSecret**: Client Secret of the AAD Application used to create the Change Notification subscription
         - **TenantId**: Tenant Id for which the Change Notification subscription needs to be created (Can be found on the application registration page)
-        - **NotificationUrl**: The HTTPS Notification URL. (if you are debugging locally you can use (ngrok)[https://ngrok.com/] by typing `ngrok http 5000 -host-header=rewrite` in a separate console and use the generated URL eg. https://3a5348f1.ngrok.io )
+        - **NotificationUrl**: The HTTPS Notification URL. (if you are debugging locally you can use (ngrok)[https://ngrok.com/] by typing `ngrok http 5000 -host-header=rewrite` in a separate console and use the generated URL eg. https://3a5348f1.ngrok.io)
 
-    - **Mandatory settings under KeyVaultSettings section**:
-          - **ClientId**: Client Id of the application created in the section "Create AAD Application for Key Vault Access" above
-          - **ClientSecret**: Client Secret of the application created in the section "Create AAD Application for Key Vault Access" above
-          - **CertificateUrl**: CertificateUrl of the certificate secret created in the section "Create AAD Application for Key Vault Access" above (e.g. https://changenotificationsample.vault.azure.net/secrets/ChangeNotificationSampleCertificate)
+    - **Mandatory settings under KeyVaultSettings section** (only if `includeResourceData` is set to `true`):
+        - **ClientId**: Client Id of the application created in the section "Create AAD Application for Key Vault Access" above
+        - **ClientSecret**: Client Secret of the application created in the section "Create AAD Application for Key Vault Access" above
+        - **CertificateUrl**: CertificateUrl of the certificate secret created in the section "Create AAD Application for Key Vault Access" above (e.g. https://changenotificationsample.vault.azure.net/secrets/ChangeNotificationSampleCertificate)
 
     - **Optional settings under SubscriptionSettings section**:
-          - **ChangeType**: CSV; possible values created, updated, deleted
-          - **Resource**: resource to create subscription for (e.g. teams/allMessages)
-          - **ClientState**: Some cryptographic string used to validate the Change Notifications
-          - **IncludeProperties**: true or false
-          - **SubscriptionExpirationTimeInMinutes**: Subscription expiration time in minutes, max 60 minutes 
-          - **SubscriptionRenewTimeInMinutes**: Subscription renew time in minutes, max 60 minutes
+        - **ChangeType**: CSV; possible values created, updated, deleted
+        - **Resource**: resource to create subscription for (e.g. teams/allMessages)
+        - **ClientState**: Some cryptographic string used to validate the Change Notifications
+        - **IncludeResourceData**: true or false
+        - **SubscriptionExpirationTimeInMinutes**: Subscription expiration time in minutes, max 60 minutes
+        - **SubscriptionRenewTimeInMinutes**: Subscription renew time in minutes, max 60 minutes
 
-- **Step 2**: In the Solution Explorer, right click on the "TeamsGraphChangeNotification" project and select "Set as StartUp Project" and click start (or play button)
+- **Step 2**: In the Solution Explorer, right click on the "GraphChangeNotification" project and select "Set as StartUp Project" and click start (or play button)
 
-- **Step 3**: Open the Microsoft Teams client and send a message for the resource to which the subscription is created. The message will be received, decrypted and printed on the console.
+- **Step 3**: Open the Microsoft Teams client and send a message for the resource to which the subscription is created. The message will be received, decrypted and printed on the console.  
+    *Note: if you are subscribing to other resources, peform the corresponding action in the UI or via the API you are subscribing to.*
