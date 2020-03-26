@@ -48,7 +48,7 @@ To do the above tasks, the app will:
 3. Connect Key Vault to your Azure AD appid
 4. Update appsettings.json with information from the previous steps
 
-### Get an Azure AD appid
+### Register the app
 
 - **Step 1**: Go to [Azure Portal](https://portal.azure.com/).
 
@@ -156,3 +156,30 @@ To do the above tasks, the app will:
 
 - **Step 3**: Open the Microsoft Teams client and send a message for the resource to which the subscription is created. The message will be received, decrypted and printed on the console.  
     *Note: if you are subscribing to other resources, peform the corresponding action in the UI or via the API you are subscribing to.*
+
+## Troubleshooting
+
+If you run into errors or problems with the sample, see the [troubleshooting doc](TROUBLESHOOTING.md).
+
+## Contributing
+
+This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+
+## Questions and comments
+
+We'd love to get your feedback about the Microsoft Graph ASP.NET Webhooks sample. You can send your questions and suggestions to us in the Issues section of this repository.
+
+Questions about Microsoft Graph in general should be posted to [Stack Overflow](https://stackoverflow.com/questions/tagged/MicrosoftGraph). Make sure that your questions or comments are tagged with `MicrosoftGraph`.
+
+If you have a feature suggestion, please post your idea on our [User Voice](https://microsoftgraph.uservoice.com/) page, and vote for your suggestions there.
+
+## Additional resources
+
+- [Microsoft Graph Node.js Webhooks sample](https://github.com/microsoftgraph/nodejs-webhooks-rest-sample)
+- [Working with Webhooks in Microsoft Graph](https://docs.microsoft.com/graph/webhooks)
+- [Subscription resource](https://developer.microsoft.com/graph/docs/api-reference/v1.0/resources/subscription)
+- [Microsoft Graph developer site](https://developer.microsoft.com/graph/)
+
+## Copyright
+
+Copyright (c) 2019 Microsoft. All rights reserved.
