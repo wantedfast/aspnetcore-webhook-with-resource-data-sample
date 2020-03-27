@@ -41,7 +41,7 @@ namespace TeamsGraphChangeNotification
 
             await this.GetSubscriptions().ConfigureAwait(false);
             await this.CreateSubscriptions().ConfigureAwait(false);
-            
+
             while (!cancellationToken.IsCancellationRequested)
             {
                 await Task.Delay(TimeSpan.FromMinutes(int.Parse(this.SubscriptionOptions.Value.SubscriptionRenewTimeInMinutes)), cancellationToken).ConfigureAwait(false);
@@ -88,9 +88,9 @@ namespace TeamsGraphChangeNotification
             string changeType = this.SubscriptionOptions.Value.ChangeType;
             string clientState = this.SubscriptionOptions.Value.ClientState;
             string notificationUrl = this.SubscriptionOptions.Value.NotificationUrl;
-            string encryptionCertificate = await this.KeyVaultManager.GetEncryptionCertificate().ConfigureAwait(false);
-            string encryptionCertificateId = await this.KeyVaultManager.GetEncryptionCertificateId().ConfigureAwait(false);
             bool includeResourceData = bool.Parse(this.SubscriptionOptions.Value.IncludeResourceData);
+            string encryptionCertificate = includeResourceData ? await this.KeyVaultManager.GetEncryptionCertificate().ConfigureAwait(false) : null;
+            string encryptionCertificateId = includeResourceData ? await this.KeyVaultManager.GetEncryptionCertificateId().ConfigureAwait(false) : null;
             int subscriptionExpirationTimeInMinutes = int.Parse(this.SubscriptionOptions.Value.SubscriptionExpirationTimeInMinutes);
 
             if (subscriptionExpirationTimeInMinutes > 60)
@@ -141,7 +141,9 @@ namespace TeamsGraphChangeNotification
         {
             // Renewing the certificate from key vault every time this is called. You can choose to provide this as a property
             // in the request body. This will help with the certificate renewal process.
-            await this.KeyVaultManager.GetEncryptionCertificate().ConfigureAwait(false);
+            bool includeResourceData = bool.Parse(this.SubscriptionOptions.Value.IncludeResourceData);
+            if (includeResourceData)
+                await this.KeyVaultManager.GetEncryptionCertificate().ConfigureAwait(false);
             try
             {
                 List<string> subscriptionIdsToRenew = new List<string>(this.TeamsSubscriptions.Keys);
