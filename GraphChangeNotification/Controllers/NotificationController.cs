@@ -46,7 +46,6 @@ namespace TeamsGraphChangeNotification.Controllers
                     }
 
                     Notification notification = JsonConvert.DeserializeObject<Notification>(content);
-                    TokenValidator tokenValidator = new TokenValidator(this.SubscriptionOptions.Value.TenantId, new[] { this.SubscriptionOptions.Value.ClientId });
 
                     if (!notification.Value.FirstOrDefault().ClientState.Equals(
                         this.SubscriptionOptions.Value.ClientState))
@@ -54,36 +53,45 @@ namespace TeamsGraphChangeNotification.Controllers
                         return BadRequest();
                     }
 
-                    bool areValidationTokensValid = (await Task.WhenAll(
-                        notification.ValidationTokens.Select(x => tokenValidator.ValidateToken(x))).ConfigureAwait(false))
-                        .Aggregate((x, y) => x && y);
-
-                    if (areValidationTokensValid)
-                    {
-                        foreach (PublisherNotification notificationItem in notification.Value.Where(x => x.EncryptedContent != null))
+                    if (notification.ValidationTokens != null && notification.ValidationTokens.Any())
+                    { // we're getting notifications with resource data and we should validate tokens and decrypt data
+                        TokenValidator tokenValidator = new TokenValidator(this.SubscriptionOptions.Value.TenantId, new[] { this.SubscriptionOptions.Value.ClientId });
+                        bool areValidationTokensValid = (await Task.WhenAll(
+                            notification.ValidationTokens.Select(x => tokenValidator.ValidateToken(x))).ConfigureAwait(false))
+                            .Aggregate((x, y) => x && y);
+                        if (areValidationTokensValid)
                         {
-                            string decryptedpublisherNotification =
-                            Decryptor.Decrypt(
-                                notificationItem.EncryptedContent.Data,
-                                notificationItem.EncryptedContent.DataKey,
-                                notificationItem.EncryptedContent.DataSignature,
-                                await this.KeyVaultManager.GetDecryptionCertificate().ConfigureAwait(false));
+                            foreach (PublisherNotification notificationItem in notification.Value.Where(x => x.EncryptedContent != null))
+                            {
+                                string decryptedpublisherNotification =
+                                Decryptor.Decrypt(
+                                    notificationItem.EncryptedContent.Data,
+                                    notificationItem.EncryptedContent.DataKey,
+                                    notificationItem.EncryptedContent.DataSignature,
+                                    await this.KeyVaultManager.GetDecryptionCertificate().ConfigureAwait(false));
 
-                            Dictionary<string, object> resourceDataObject = JsonConvert.DeserializeObject<Dictionary<string, object>>(decryptedpublisherNotification);
-                            Console.WriteLine($"Decrypted Notification: {decryptedpublisherNotification}");
+                                Dictionary<string, object> resourceDataObject = JsonConvert.DeserializeObject<Dictionary<string, object>>(decryptedpublisherNotification);
+                                Console.WriteLine($"Decrypted Notification: {decryptedpublisherNotification}");
+                            }
+                            return Ok();
                         }
+                        else
+                        {
+                            return Unauthorized("Token Validation failed");
+                        } 
                     }
                     else
-                    {
-                        return Unauthorized("Token Validation failed");
+                    { // we're getting notifications without data and should call back the graph or tokens are missing and we shouldn't attempt to decrypt data
+                        foreach (PublisherNotification notificationItem in notification.Value)
+                            Console.WriteLine($"received notification for {notificationItem.Resource}");
+                        return Ok();
                     }
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Exception while decrypting notification: {ex}");
+                    return Problem();
                 }
-
-                return Ok();
             }
             else
             {
