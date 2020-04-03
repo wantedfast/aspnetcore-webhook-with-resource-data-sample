@@ -124,11 +124,10 @@ To do the above tasks, the app will:
 *Note: you are only required to follow these steps if the resource you are subscribing to supports including resouces data in notifications and if you set `includeResourceData` to `true` in the configuration. In any other case, you can skip these steps. Refer to [the documentation](https://docs.microsoft.com/graph/api/resources/webhooks?view=graph-rest-beta) for a complete list of resources that support or not including resources data.*  
 
 1. Go to Access policies under Settings. Click Add Access Policy.
-2. Under Secret Permissions, select Get and List.
-3. Under Certificate Permissions, select Get and List.
-4. Under Select principal, select your appid.
-5. Under Authorized application, select your app. (pro tip: enter the appid in the search box)
-6. Click Add to finish your access policy. Wait for your access policy to deploy.
+1. Under Secret Permissions, select Get and List.
+1. Under Certificate Permissions, select Get and List.
+1. Under Select principal, select your appid.
+1. Click Add to finish your access policy. Wait for your access policy to deploy.
 
 ### Update appsettings.json
 
