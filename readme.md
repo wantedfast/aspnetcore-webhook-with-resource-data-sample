@@ -1,26 +1,8 @@
----
-page_type: sample 
-products:
-- ms-graph
-products:
-- ms-graph
-- office-teams
-- office-sp
-- office-outlook
-- m365
-languages:
-- aspx-csharp
-- csharp
-description: "Create Microsoft Graph webhook subscriptions for a ASP.NET Core app, so that it can receive notifications of changes for any resource. This sample also supports receiving change notifications with data, validating and decrypting the payload."
-extensions:
-  contentType: samples
-  technologies:
-  - Microsoft Graph
-  createdDate: 3/15/2020 4:12:18 PM
----
+# Sample Application - Microsoft Graph Change Notifications
+
 ![.NET Core](https://github.com/microsoftgraph/csharp-webhook-with-resource-data/workflows/.NET%20Core/badge.svg?branch=master)
 
-# Sample Application - Microsoft Graph Change Notifications
+**This sample is now archived and replaced by [the main webhook sample](https://github.com/microsoftgraph/aspnetcore-webhooks-sample)**
 
 Subscribe for [Microsoft Graph change notifications](https://docs.microsoft.com/graph/webhooks) to be notified when your user's data changes so you don't have to poll for changes.
 
