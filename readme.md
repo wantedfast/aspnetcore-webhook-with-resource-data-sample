@@ -121,6 +121,8 @@ To do the above tasks, the app will:
         - **NotificationUrl**: The HTTPS Notification URL. (if you are debugging locally you can use (ngrok)[https://ngrok.com/] by typing `ngrok http 5000 -host-header=rewrite` in a separate console and use the generated URL eg. https://3a5348f1.ngrok.io)
 
     - **Mandatory settings under KeyVaultSettings section** (only if `includeResourceData` is set to `true`):
+        - **KeyVaultUri**: Azure Key Vault Uri of Azure Key Vault created in the section "Create Azure Key Vault" above
+        - **TenantId**: Tenant Id of the application created in the section "Create AAD Application for Key Vault Access" above
         - **ClientId**: Client Id of the application created in the section "Create AAD Application for Key Vault Access" above
         - **ClientSecret**: Client Secret of the application created in the section "Create AAD Application for Key Vault Access" above
         - **CertificateUrl**: CertificateUrl of the certificate secret created in the section "Create AAD Application for Key Vault Access" above (e.g. https://changenotificationsample.vault.azure.net/secrets/ChangeNotificationSampleCertificate)
